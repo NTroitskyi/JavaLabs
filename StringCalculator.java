@@ -1,4 +1,3 @@
-
 class CustomException extends Exception{
     public CustomException(String msg){
         super(msg);
@@ -30,9 +29,8 @@ public class StringCalculator {
         }
         else
         {
-            String halfsplit[] = numbers.split("\n");
-
-            delimiter = Del(numbers);
+            String halfsplit[] = numbers.split("\n",2);
+            delimiter = Del(halfsplit[0]);
             String nums[] = halfsplit[1].split(delimiter);
             sum = LoopSumCalc(nums);
         }
@@ -45,8 +43,7 @@ public class StringCalculator {
     {
         int sum = 0;
         String negatives = "";
-        for (int i = 0; i<numbers.length; i++)
-        {
+        for (int i = 0; i<numbers.length; i++) {
             if (Integer.parseInt(numbers[i])<0)
                 negatives += numbers[i] + ",";
             else if (Integer.parseInt(numbers[i])<1000)
@@ -57,21 +54,50 @@ public class StringCalculator {
         return sum;
     }
     private static String Del(String numbers) throws CustomException {
-        String delimiter = ",|\n";
-        int index_st = 0;
-        while (true) {
-            index_st = numbers.indexOf("[", index_st) + 1;
-            if (index_st == 0) {
-                break;
+        String delimiter = ",|\\n|";
+        int flag = 0;
+        for (int i = 0; i<numbers.length(); i++) {
+            if (numbers.charAt(i) == ']') {
+                flag = 0;
+                if (i<(numbers.length()-1))
+                    delimiter += "|";
             }
-            int index_ed = numbers.indexOf("]", index_st);
-            delimiter += "|" + numbers.substring(index_st, index_ed);
+            if (flag == 1) {
+                if (Character.isDigit(numbers.charAt(i)))
+                    delimiter += numbers.substring(i, i+1);
+                else if (Character.isLetter(numbers.charAt(i)))
+                    delimiter += numbers.substring(i, i+1);
+                else
+                    delimiter += "\\" + numbers.substring(i, i+1);
+            }
+            if (numbers.charAt(i) == '[') {
+                flag = 1;
+            }
+
         }
+        /*sort delimiters*/
+        System.out.println("before: " + delimiter);
+        String strList[] = delimiter.split("\\|");
+        delimiter = "";
+        for (int j=1; j<strList.length; j++){
+            for (int i=0; i<strList.length; i++) {
+                if (strList[j].length() > strList[i].length()) {
+                    String temp = strList[i];
+                    strList[i] = strList[j];
+                    strList[j] = temp;
+                }
+            }
+        }
+        delimiter += strList[0];
+        for (int i = 1; i<strList.length; i++){
+            delimiter +=  "|" + strList[i];
+        }
+        System.out.println("after: " + delimiter);
         return delimiter;
     }
 
     public static void main(String[] args) throws CustomException {
         /*example*/
-        System.out.println(StringCalculator.add("//[x][yy]\n1x2yy4,1000"));
+        System.out.println(StringCalculator.add("//[aa][aaa]\n2aaa8aa10"));
     }
 }
